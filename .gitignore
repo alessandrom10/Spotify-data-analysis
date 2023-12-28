@@ -4,7 +4,7 @@
 **/*.toc
 **/*.fls
 **/*.fdb_latexmk
-latex/**/*.pdf
+Documents/**/*.pdf
 **/*.synctex.gz
 **/.vscode
 **/.DS_Store
