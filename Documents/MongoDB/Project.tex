@@ -101,7 +101,7 @@
 \usepackage{geometry}
 
 \lstdefinelanguage{MongoDB}{
-  morekeywords={db, aggregate, \$group, \_id, \$avg, \$sort, sort},
+  morekeywords={db, aggregate, \$group, \_id, \$avg, \$sum, \$sort, sort},
   sensitive=true,
   morecomment=[l]{//},
   morecomment=[s]{/*}{*/},
@@ -274,17 +274,19 @@ The source of the dataset is:\\
 \section*{Queries}
 \subsection{Preferred musical genre}
 This query analyses the popularity of each musical genre, by calculating the average of the track\_popularity score for each one of them, in order to understand what musical genre are the user's favorites\\
+
 \begin{algorithm}[ht]
 \caption{Preferred musical genre}
 \begin{lstlisting} [numbers = left]
 db.spotify_music.aggregate([
 	{"$group" : {
-		"_id" : {"music_genre" : "$playlist_genre"},
-		"track_popularity" : {"$avg" : "$track_popularity"}
-	}}
-]).sort({
-	"track_popularity" : -1
-})
+			"_id" : {"Music_genre" : "$playlist_genre"},
+			"Popularity" : {"$avg" : "$track_popularity"},
+			"Number_of_samples" : {"$sum" : 1}
+		}}
+	]).sort({
+		"Popularity" : -1
+	})
 \end{lstlisting}
 \end{algorithm}
 \newpage
@@ -294,46 +296,44 @@ Output:
 \caption{Output Preferred musical genre}
 \begin{lstlisting} [numbers = left]
 [
-{
-	_id: {
-	music_genre: 'pop'
+	{
+		_id: { Music_genre: 'pop' },
+		Popularity: 47.74487016524424,
+		Number_of_samples: 5507
 	},
-	track_popularity: 47.74487016524424
-},
-{
-	_id: {
-	music_genre: 'latin'
+	{
+		_id: { Music_genre: 'latin' },
+		Popularity: 47.026576139670226,
+		Number_of_samples: 5155
 	},
-	track_popularity: 47.026576139670226
-},
-{
-	_id: {
-	music_genre: 'rap'
+	{
+		_id: { Music_genre: 'rap' },
+		Popularity: 43.21545422902889,
+		Number_of_samples: 5746
 	},
-	track_popularity: 43.21545422902889
-},
-{
-	_id: {
-	music_genre: 'rock'
+	{
+		_id: { Music_genre: 'rock' },
+		Popularity: 41.72833770955363,
+		Number_of_samples: 4951
 	},
-	track_popularity: 41.72833770955363
-},
-{
-	_id: {
-	music_genre: 'r&b'
+	{
+		_id: { Music_genre: 'r&b' },
+		Popularity: 41.22353157797827,
+		Number_of_samples: 5431
 	},
-	track_popularity: 41.22353157797827
-},
-{
-	_id: {
-	music_genre: 'edm'
-	},
-	track_popularity: 34.83352639417508
-}
+	{
+		_id: { Music_genre: 'edm' },
+		Popularity: 34.83352639417508,
+		Number_of_samples: 6043
+	}
 ]
 \end{lstlisting}
 \end{algorithm}
 \newpage
+
+\subsection{Loudest musical genre}
+This query tries to understand which is the loudest musical genre, by calculating the average loudness of each one of them\\
+
 
 % LIST OF FIGURES
 %\listoffigures
