@@ -96,6 +96,30 @@
 %----------------------------------------------------------------------------
 %	ADD YOUR PACKAGES (be careful of package interaction)
 %----------------------------------------------------------------------------
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{geometry}
+
+\lstdefinelanguage{MongoDB}{
+  morekeywords={db, aggregate, \$group, \_id, \$avg, \$sort, sort},
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]'"
+}
+
+\lstset{
+  language=MongoDB,
+  basicstyle=\ttfamily,
+  keywordstyle=\color{blue},
+  commentstyle=\color{green!40!black},
+  stringstyle=\color{black},
+  stepnumber=1,
+  numberstyle=\tiny\color{gray},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=4
+}
 
 %----------------------------------------------------------------------------
 %	ADD YOUR DEFINITIONS AND COMMANDS (be careful of existing commands)
@@ -247,8 +271,69 @@ The data schema is:
 The source of the dataset is:\\
 \url{https://www.kaggle.com/datasets/joebeachcapital/30000-spotify-songs}
 \newpage
-\section{Queries}
-\subsubsection{Query 1}
+\section*{Queries}
+\subsection{Preferred musical genre}
+This query analyses the popularity of each musical genre, by calculating the average of the track\_popularity score for each one of them, in order to understand what musical genre are the user's favorites\\
+\begin{algorithm}[ht]
+\caption{Preferred musical genre}
+\begin{lstlisting} [numbers = left]
+db.spotify_music.aggregate([
+	{"$group" : {
+		"_id" : {"music_genre" : "$playlist_genre"},
+		"track_popularity" : {"$avg" : "$track_popularity"}
+	}}
+]).sort({
+	"track_popularity" : -1
+})
+\end{lstlisting}
+\end{algorithm}
+\newpage
+
+Output:
+\begin{algorithm}[h!]
+\caption{Output Preferred musical genre}
+\begin{lstlisting} [numbers = left]
+[
+{
+	_id: {
+	music_genre: 'pop'
+	},
+	track_popularity: 47.74487016524424
+},
+{
+	_id: {
+	music_genre: 'latin'
+	},
+	track_popularity: 47.026576139670226
+},
+{
+	_id: {
+	music_genre: 'rap'
+	},
+	track_popularity: 43.21545422902889
+},
+{
+	_id: {
+	music_genre: 'rock'
+	},
+	track_popularity: 41.72833770955363
+},
+{
+	_id: {
+	music_genre: 'r&b'
+	},
+	track_popularity: 41.22353157797827
+},
+{
+	_id: {
+	music_genre: 'edm'
+	},
+	track_popularity: 34.83352639417508
+}
+]
+\end{lstlisting}
+\end{algorithm}
+\newpage
 
 % LIST OF FIGURES
 %\listoffigures
