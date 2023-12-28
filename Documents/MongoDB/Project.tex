@@ -169,6 +169,87 @@
 \label{ch:chapter_one}%
 % The \label{...}% enables to remove the small indentation that is generated, always leave the % symbol.
 
+\section{Introduction}
+Using the following dataset we'd like to tackle the problem of researching whether songs of the same genre also share specific values of the main features describing them (for example the energy or the danceability) and whether tracks with certain features are more likely to become popular than others\\
+To face such task a documental database technology (more specifically MongoDB) has been chosen, since in this dataset the relationship between each object is quite often not relevant, and we care much more about the features of each single track, furthermore the granularity to which we'd like to operate is always the one of the single track, which therefore fit as a perfect business object for our day-to-day activity
+\newpage
+
+\section{Dataset}
+This dataset provides comprehensive information about tracks available on the Spotify application, each document represent a single track that can be easily found by searching its name through Spotify search feature.\\
+The data schema is:
+\begin{table}[h!]
+	\begin{center}
+		\begin{tabular}{|m{12em}|m{4em}|m{25em}|}
+		\hline
+		\textbf{Attribute} & \textbf{Type} & \textbf{Description}\\
+		\hline
+			track\_id & String & The song unique ID\\
+		\hline
+			track\_name & String & The name of the track\\
+		\hline
+			track\_artist & String & The name of the artist that made the song\\
+		\hline
+			track\_popularity & Integer & The popularity score of the track on Spotify ranging from a minimum of 0 to a maximum of 100.\\
+		\hline
+			track\_album\_id & String & The unique ID of the album\\
+		\hline
+			track\_album\_name & String & The name of the album the track belongs to\\
+		\hline
+			track\_album\_release\_date & Date & The date in which the album was released\\
+		\hline
+			playlist\_name & String & The name of the playlist in which Spotify classified this song\\
+		\hline
+			playlist\_id & String & The ID of the playlist in which Spotify classified this song\\
+		\hline
+			playlist\_genre & String & The genre of the playlist in which Spotify classified this song\\
+		\hline
+			playlist\_subgenre & String & The subgenre of the playlist in which Spotify classified this song\\
+		\hline
+			danceability & Double & A score ranging from 0 to 1 that represents how suitable a track is for dancing based on various musical elements including tempo, rhythm stability, beat strength, and overall regularity.\\
+		\hline
+			energy & Double & A measure of the perceptual intensity and activity of a track, ranging from 0 to 1. Typically, energetic tracks feel fast, loud, and noisy. For example, death metal's tracks have high energy, while a Bach prelude scores low on this scale.\\
+		\hline
+			key & Integer & The estimated overall key of the track. Standard integer pitch notation is used, e.g. C = 0, C$\sharp$/D$\flat$ = 1, D = 2, and so on, while if no key was detected, a value of -1 is assigned\\
+		\hline
+		\end{tabular}
+	\end{center}
+\end{table}\newpage
+
+\begin{table}[h!]
+	\begin{center}
+		\hspace*{-1cm}
+		\begin{tabular}{|m{8em}|m{4em}|m{29em}|}
+		\hline
+		\textbf{Attribute} & \textbf{Type} & \textbf{Description}\\
+		\hline
+			loudness & Double & The overall loudness of a track in decibels (dB). Loudness values are averaged across the entire track and typically range between -60 and 0 db\\
+		\hline
+			mode & Integer & The tonal mode of the track, the type of scale from which its melodic content is derived, represented by an integer value (0 for minor, 1 for major).\\
+		\hline
+			speechiness & Double & A score ranging from 0 to 1 that represents the presence of spoken words in a track. The more exclusively speech-like the recording the closer to 1.0 the attribute value.\\
+		\hline
+			acousticness & Double & A score ranging from 0 to 1 that represents the confidence of a track being acoustic or similarly the extent to which a track possesses an acoustic quality. (1.0 represents very high confidence that the track is acoustic)\\
+		\hline
+			instrumentalness & Double & A score ranging from 0 to 1 that represents the likelihood of a track being instrumental (so having no vocals). The closer the instrumentalness value is to 1.0, the greater is the likelihood that the track contains no vocal content, values above 0.5 can be considered as instrumental tracks, but confidence is higher as the value approaches 1.0.\\
+		\hline
+			liveness & Double & A score ranging from 0 to 1 that represents the probability of the presence of an audience during the recording or performance of a track. A value above 0.8 provides a strong likelihood that the track has been performed live.\\
+		\hline
+			valence & Double & A score ranging from 0 to 1 that represents the musical positiveness conveyed by a track. Tracks with high valence sound more positive (happy, cheerful, euphoric), while tracks with low valence sound more negative (sad, depressed, angry).\\
+		\hline
+			tempo & Double & The overall estimated tempo of the track in beats per minute (BPM). Tempo is perceived as the speed or pace of a given track.\\
+		\hline
+			duration\_ms & Integer & The duration of the track in milliseconds.\\
+		\hline
+		\end{tabular}
+		\hspace*{1cm}
+	\end{center}
+\end{table}
+The source of the dataset is:\\
+\url{https://www.kaggle.com/datasets/joebeachcapital/30000-spotify-songs}
+\newpage
+\section{Queries}
+\subsubsection{Query 1}
+
 % LIST OF FIGURES
 %\listoffigures
 
