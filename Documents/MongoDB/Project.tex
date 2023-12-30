@@ -332,7 +332,7 @@ Output:
 \newpage
 
 \subsection{Most popular song for each genre}
-This query explores which is the most popular song in each genre, by finding the song with the highest popularity score among each one of them (we have chosen to allow songs to be in more than one genre, if they have been classified as such)\\
+This query explores which is the most popular song in each genre, by finding the song with the highest popularity score among each one of them (we have chosen for this query to allow songs to be in more than one genre, if they have been classified as such)\\
 \begin{algorithm}[ht]
 \caption{Most popular song for each genre}
 \begin{lstlisting} [numbers = left]
@@ -519,11 +519,12 @@ For this query, only artist that have produced at least two different songs have
 \begin{lstlisting} [numbers = left]
 db.spotify_music.aggregate([
 	{"$group" : {
-			"_id" : {"track_artist" : "$track_artist", "track_name" : "$track_name"},
+			"_id" : {"track_id" : "$track_id"},
+			"track_artist" : {"$first" : "$track_artist"}, 
 			"track_popularity" : {"$max" : "$track_popularity"}
 	}},
 	{"$group" : {
-		"_id" : "$_id.track_artist",
+		"_id" : {"Track_Artist" : "$track_artist"},
 		"Average_Song_Popularity" : {"$avg" : "$track_popularity"},
 		"Number_of_Songs" : {"$sum" : 1}
 	}},
@@ -541,39 +542,39 @@ Output:
 \begin{lstlisting} [numbers = left]
 [
 	{
-		_id: 'Don Toliver',
+		_id: { Track_Artist: 'Don Toliver' },
 		Average_Song_Popularity: 87.5,
 		Number_of_Songs: 2
 	},
 	{
-		_id: 'Kina',
+		_id: { Track_Artist: 'Kina' },
 		Average_Song_Popularity: 85.5,
-		Number_of_Songs: 2 
+		Number_of_Songs: 2
 	},
 	{
-		_id: 'MEDUZA',
-		Average_Song_Popularity: 85.33333333333333,
-		Number_of_Songs: 3
-	},
-	{
-		_id: 'Juice WRLD',
-		Average_Song_Popularity: 85,
-		Number_of_Songs: 9
-	},
-	{
-		_id: 'JACKBOYS',
+		_id: { Track_Artist: 'JACKBOYS' },
 		Average_Song_Popularity: 84.33333333333333,
 		Number_of_Songs: 3
 	},
 	{
-		_id: 'Roddy Ricch',
-		Average_Song_Popularity: 84,
+		_id: { Track_Artist: 'DaBaby' },
+		Average_Song_Popularity: 83.66666666666667,
 		Number_of_Songs: 6
 	},
 	{
-		_id: 'DaBaby',
-		Average_Song_Popularity: 83.66666666666667,
-		Number_of_Songs: 6
+		_id: { Track_Artist: 'Roddy Ricch' },
+		Average_Song_Popularity: 83.42857142857143,
+		Number_of_Songs: 7
+	},
+	{
+		_id: { Track_Artist: 'Harry Styles' },
+		Average_Song_Popularity: 81.77777777777777,
+		Number_of_Songs: 9
+	},
+	{
+		_id: { Track_Artist: 'YNW Melly' },
+		Average_Song_Popularity: 81.57142857142857,
+		Number_of_Songs: 7
 	}
 ]
 \end{lstlisting}
@@ -581,25 +582,23 @@ Output:
 \newpage
 
 \subsection{Most popular albums}
-This query explores what are the most popular albums on Spotify at the moment, by calculating the average of the track\_popularity score among each of their songs\\
+This query explores what are the most popular albums on Spotify at the moment, by calculating the average of the track\_popularity score among each of their songs.\\
 For this query, only albums for which we have data on at least three different tracks are considered
 \begin{algorithm}[ht]
 \caption{Most popular albums}
 \begin{lstlisting} [numbers = left]
 db.spotify_music.aggregate([
 	{"$group" : {
-		"_id" : {
-			"track_artist" : "$track_artist",
-			"track_name" : "$track_name"
-		},
+		"_id" : {"track_id" : "$track_id" },
+		"track_artist" : {"$first" : "$track_artist"},
 		"track_popularity" : {"$max" : "$track_popularity"},
+		"track_album_id" : {"$first" : "$track_album_id"},
 		"track_album_name" : {"$first" : "$track_album_name"}
 	}},
 	{"$group" : {
-		"_id" : {
-			"Artist" : "$_id.track_artist",
-			"Album_name" : "$track_album_name"
-		},
+		"_id" : { "Album_id" : "$track_album_id" },
+		"Artist" : {"$first" : "$track_artist"},
+		"Album_Name" : {"$first" : "$track_album_name"},
 		"Average_Song_Popularity" : {"$avg" : "$track_popularity"},
 		"Number_of_Songs" : {"$sum" : 1}
 	}},
@@ -618,44 +617,39 @@ Output:
 \begin{lstlisting} [numbers = left]
 [
 	{
-		_id: {
-			Artist: 'DaBaby',
-			Album_name: 'KIRK'
-		},
+		_id: { Album_id: '4g1ZRSobMefqF6nelkgibi' },
+		Artist: 'Post Malone',
+		Album_Name: "Hollywood's Bleeding",
+		Average_Song_Popularity: 90.5,
+		Number_of_Songs: 4
+	},
+	{
+		_id: { Album_id: '1NsTSXjVNE7XmZ8PmyW0wl' },
+		Artist: 'DaBaby',
+		Album_Name: 'KIRK',
 		Average_Song_Popularity: 89,
 		Number_of_Songs: 3
 	},
 	{
-		_id: {
-			Artist: 'Roddy Ricch',
-			Album_name: 'Please Excuse Me For Being Antisocial'
-		},
+		_id: { Album_id: '7xV2TzoaVc0ycW7fwBwAml' },
+		Artist: 'Harry Styles',
+		Album_Name: 'Fine Line',
+		Average_Song_Popularity: 87.33333333333333,
+		Number_of_Songs: 3
+	},
+	{
+		_id: { Album_id: '52u4anZbHd6UInnmHRFzba' },
+		Artist: 'Roddy Ricch',
+		Album_Name: 'Please Excuse Me For Being Antisocial',
 		Average_Song_Popularity: 86.25,
 		Number_of_Songs: 4
 	},
 	{
-		_id: {
-			Artist: 'Ed Sheeran',
-			Album_name: 'No.6 Collaborations Project'
-		},
-		Average_Song_Popularity: 85.75,
+		_id: { Album_id: '6tkjU4Umpo79wwkgPMV3nZ' },
+		Artist: 'Juice WRLD',
+		Album_Name: 'Goodbye & Good Riddance',
+		Average_Song_Popularity: 85.5,
 		Number_of_Songs: 4
-	},
-	{
-		_id: {
-			Artist: 'Juice WRLD',
-			Album_name: 'Goodbye & Good Riddance'
-		},
-		Average_Song_Popularity: 85.33333333333333,
-		Number_of_Songs: 3
-	},
-	{
-		_id: {
-			Artist: 'JACKBOYS',
-			Album_name: 'JACKBOYS'
-		},
-		Average_Song_Popularity: 84.33333333333333,
-		Number_of_Songs: 3
 	}
 ]
 \end{lstlisting}
@@ -665,16 +659,15 @@ Output:
 
 \subsection{Longest tracks}
 In this query we search for the longest tracks in the whole dataset\\
-The duration of each song has been converted into minutes for readability\\
+The duration of each song has been converted into minutes for readability purposes\\
 \begin{algorithm}[ht]
 \caption{Longest tracks}
 \begin{lstlisting} [numbers = left]
 db.spotify_music.aggregate([
 	{"$group" : {
-		"_id" : {
-			"Artist" : "$track_artist",
-			"Song_name" : "$track_name"
-		},
+		"_id" : {"Track_id" : "$track_id" },
+		"Track_Name" : {"$first" : "$track_name"},
+		"Track_Artist" : {"$first" : "$track_artist"},
 		"Duration_min" : {"$max" : {"$divide" : ["$duration_ms", 60000]}}
 	}},
 	{"$sort" : {"Duration_min" : -1}},
@@ -690,44 +683,113 @@ Output:
 \begin{lstlisting} [numbers = left]
 [
 	{
-		_id: {
-			Artist: 'Anuel AA',
-			Song_name: '47 - Remix'
-		},
+		_id: { Track_id: '6IoKSUyNOOheJRjiuGb1ew' },
+		Track_Name: '47 - Remix',
+		Track_Artist: 'Anuel AA',
 		Duration_min: 8.630166666666666
 	},
 	{
-		_id: {
-			Artist: 'Led Zeppelin',
-			Song_name: 'Kashmir - 2012 Remaster'
-		},
+		_id: { Track_id: '6Vjk8MNXpQpi0F4BefdTyq' },
+		Track_Name: 'Kashmir - 2012 Remaster',
+		Track_Artist: 'Led Zeppelin',
 		Duration_min: 8.61875
 	},
 	{
-		_id: {
-			Artist: 'Don McLean',
-			Song_name: 'American Pie'
-		},
+		_id: { Track_id: '1fDsrQ23eTAVFElUMaf38X' },
+		Track_Name: 'American Pie',
+		Track_Artist: 'Don McLean',
 		Duration_min: 8.614883333333333
 	},
 	{
-		_id: {
-			Artist: 'Newcleus',
-			Song_name: 'Jam On It (Re-Recorded Version)'
-		},
+		_id: { Track_id: '22Nq8jG98vSGghSyBsIjMO' },
+		Track_Name: 'Jam On It (Re-Recorded Version)',
+		Track_Artist: 'Newcleus',
 		Duration_min: 8.612666666666666
 	},
 	{
-		_id: {
-			Artist: 'Yes',
-			Song_name: 'Roundabout - 2008 Remaster'
-		},
+		_id: { Track_id: '7lPjS6Yd4lRk4BsboDsm1H' },
+		Track_Name: 'Roundabout - 2008 Remaster',
+		Track_Artist: 'Yes',
 		Duration_min: 8.599333333333334
 	}
 ]
 \end{lstlisting}
 \end{algorithm}
 \newpage
+
+\subsection{What tempo is more popular?}
+This query analyses what range of values for the tempo is preferred by artists, and if there is a certain tempo range that is also generally preferred by users\\
+The selected tempo ranges are:
+\begin{itemize}
+	\item 0 $\le x_{tempo} <$ 75
+	\item 75 $\le x_{tempo} <$ 100
+	\item 100 $\le x_{tempo} <$ 125
+	\item 125 $\le x_{tempo} <$ 150
+	\item 150 $\le x_{tempo} <$ 175
+	\item 175 $\le x_{tempo} <$ 250
+\end{itemize}
+
+\begin{algorithm}[ht]
+\caption{What tempo is more popular?}
+\begin{lstlisting} [numbers = left]
+db.spotify_music.aggregate([
+	{"$group" : {
+			"_id" : {"Track_id" : "$track_id"},
+			"tempo" : {"$first" : "$tempo"},
+			"track_popularity" : {"$first" : "$track_popularity"},
+	}},
+	{$bucket: {
+		groupBy: "$tempo",
+		boundaries: [0, 75, 100, 125, 150, 175, 250],
+		default: "Other",
+		output: {
+			"Average_popularity": { $avg: "$track_popularity" },
+			"Number_of_samples": { $sum: 1 }
+		}
+	}}
+])
+\end{lstlisting}
+\end{algorithm}
+\newpage
+
+Output:
+\begin{algorithm}[ht]
+\caption{Output: What tempo is more popular?}
+\begin{lstlisting} [numbers = left]
+[
+	{
+		_id: 0,
+		Average_popularity: 40.631147540983605,
+		Number_of_samples: 366
+	},
+	{
+		_id: 75,
+		Average_popularity: 40.434599156118146,
+		Number_of_samples: 6873
+	},
+	{
+		_id: 100,
+		Average_popularity: 39.97265987025023,
+		Number_of_samples: 8632
+	},
+	{
+		_id: 125,
+		Average_popularity: 36.618880710363364,
+		Number_of_samples: 8559
+	},
+	{
+		_id: 150,
+		Average_popularity: 41.83413908516177,
+		Number_of_samples: 2689
+	},
+	{
+		_id: 175,
+		Average_popularity: 41.63298302344381,
+		Number_of_samples: 1237
+	}
+]
+\end{lstlisting}
+\end{algorithm}
 
 % LIST OF FIGURES
 %\listoffigures
