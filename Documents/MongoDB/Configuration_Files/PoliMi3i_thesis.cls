@@ -93,7 +93,7 @@
 \define@key[OIST]{title}{name3}{\def\nameC{#1}}
 \define@key[OIST]{title}{name4}{\def\nameD{#1}}
 \define@key[OIST]{title}{name5}{\def\nameE{#1}}
-\define@key[OIST]{title}{groupnumber}{\def\groupnumber{#1}}
+%\define@key[OIST]{title}{groupnumber}{\def\groupnumber{#1}}
 \define@key[OIST]{title}{academicyear}{\def\academicyear{#1}}
 
 \providecommand{\puttitle}{}
@@ -129,7 +129,7 @@
 			\\
 			\vspace{0.51cm}
 			\\
-			{\color{black} \Large {Group Number:} \bfseries{\groupnumber}} \\ \\
+			%{\color{black} \Large {Group Number:} \bfseries{\groupnumber}} \\ \\
 			\end{minipage}
 			\\
 			\vspace*{\fill}
