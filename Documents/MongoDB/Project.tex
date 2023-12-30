@@ -101,7 +101,7 @@
 \usepackage{geometry}
 
 \lstdefinelanguage{MongoDB}{
-  morekeywords={db, aggregate, \$group, \$match, \_id, \$max, \$avg, \$sum, \$sort, \$limit, sort},
+  morekeywords={db, aggregate, \$group, \$bucket, \$match, \_id, \$max, \$avg, \$sum, \$first, \$sort, \$limit, sort},
   sensitive=true,
   morecomment=[l]{//},
   morecomment=[s]{/*}{*/},
@@ -519,12 +519,11 @@ For this query, only artist that have produced at least two different songs have
 \begin{lstlisting} [numbers = left]
 db.spotify_music.aggregate([
 	{"$group" : {
-			"_id" : "$track_name",
-			"track_popularity" : {"$max" : "$track_popularity"},
-			"track_artist" : {"$first" : "$track_artist"}
+			"_id" : {"track_artist" : "$track_artist", "track_name" : "$track_name"},
+			"track_popularity" : {"$max" : "$track_popularity"}
 	}},
 	{"$group" : {
-		"_id" : "$track_artist",
+		"_id" : "$_id.track_artist",
 		"Average_Song_Popularity" : {"$avg" : "$track_popularity"},
 		"Number_of_Songs" : {"$sum" : 1}
 	}},
@@ -579,6 +578,156 @@ Output:
 ]
 \end{lstlisting}
 \end{algorithm}
+\newpage
+
+\subsection{Most popular albums}
+This query explores what are the most popular albums on Spotify at the moment, by calculating the average of the track\_popularity score among each of their songs\\
+For this query, only albums for which we have data on at least three different tracks are considered
+\begin{algorithm}[ht]
+\caption{Most popular albums}
+\begin{lstlisting} [numbers = left]
+db.spotify_music.aggregate([
+	{"$group" : {
+		"_id" : {
+			"track_artist" : "$track_artist",
+			"track_name" : "$track_name"
+		},
+		"track_popularity" : {"$max" : "$track_popularity"},
+		"track_album_name" : {"$first" : "$track_album_name"}
+	}},
+	{"$group" : {
+		"_id" : {
+			"Artist" : "$_id.track_artist",
+			"Album_name" : "$track_album_name"
+		},
+		"Average_Song_Popularity" : {"$avg" : "$track_popularity"},
+		"Number_of_Songs" : {"$sum" : 1}
+	}},
+	{"$match" : {"Number_of_Songs" : {"$gte" : 3}}},
+	{"$sort" : {"Average_Song_Popularity" : -1}},
+	{"$limit" : 5}
+])
+\end{lstlisting}
+\end{algorithm}
+\newpage
+
+\newgeometry{top = 5 em}
+Output:
+\begin{algorithm}[h!]
+\caption{Output: Most popular albums}
+\begin{lstlisting} [numbers = left]
+[
+	{
+		_id: {
+			Artist: 'DaBaby',
+			Album_name: 'KIRK'
+		},
+		Average_Song_Popularity: 89,
+		Number_of_Songs: 3
+	},
+	{
+		_id: {
+			Artist: 'Roddy Ricch',
+			Album_name: 'Please Excuse Me For Being Antisocial'
+		},
+		Average_Song_Popularity: 86.25,
+		Number_of_Songs: 4
+	},
+	{
+		_id: {
+			Artist: 'Ed Sheeran',
+			Album_name: 'No.6 Collaborations Project'
+		},
+		Average_Song_Popularity: 85.75,
+		Number_of_Songs: 4
+	},
+	{
+		_id: {
+			Artist: 'Juice WRLD',
+			Album_name: 'Goodbye & Good Riddance'
+		},
+		Average_Song_Popularity: 85.33333333333333,
+		Number_of_Songs: 3
+	},
+	{
+		_id: {
+			Artist: 'JACKBOYS',
+			Album_name: 'JACKBOYS'
+		},
+		Average_Song_Popularity: 84.33333333333333,
+		Number_of_Songs: 3
+	}
+]
+\end{lstlisting}
+\end{algorithm}
+\newpage
+\restoregeometry
+
+\subsection{Longest tracks}
+In this query we search for the longest tracks in the whole dataset\\
+The duration of each song has been converted into minutes for readability\\
+\begin{algorithm}[ht]
+\caption{Longest tracks}
+\begin{lstlisting} [numbers = left]
+db.spotify_music.aggregate([
+	{"$group" : {
+		"_id" : {
+			"Artist" : "$track_artist",
+			"Song_name" : "$track_name"
+		},
+		"Duration_min" : {"$max" : {"$divide" : ["$duration_ms", 60000]}}
+	}},
+	{"$sort" : {"Duration_min" : -1}},
+	{"$limit": 5}
+])
+\end{lstlisting}
+\end{algorithm}
+\newpage
+
+Output:
+\begin{algorithm}[h!]
+\caption{Output: Longest tracks}
+\begin{lstlisting} [numbers = left]
+[
+	{
+		_id: {
+			Artist: 'Anuel AA',
+			Song_name: '47 - Remix'
+		},
+		Duration_min: 8.630166666666666
+	},
+	{
+		_id: {
+			Artist: 'Led Zeppelin',
+			Song_name: 'Kashmir - 2012 Remaster'
+		},
+		Duration_min: 8.61875
+	},
+	{
+		_id: {
+			Artist: 'Don McLean',
+			Song_name: 'American Pie'
+		},
+		Duration_min: 8.614883333333333
+	},
+	{
+		_id: {
+			Artist: 'Newcleus',
+			Song_name: 'Jam On It (Re-Recorded Version)'
+		},
+		Duration_min: 8.612666666666666
+	},
+	{
+		_id: {
+			Artist: 'Yes',
+			Song_name: 'Roundabout - 2008 Remaster'
+		},
+		Duration_min: 8.599333333333334
+	}
+]
+\end{lstlisting}
+\end{algorithm}
+\newpage
 
 % LIST OF FIGURES
 %\listoffigures
