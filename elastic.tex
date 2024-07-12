@@ -1,0 +1,975 @@
+\chapter{Elasticsearch}
+\label{ch:mongodb}%
+% The \label{...}% enables to remove the small indentation that is generated, always leave the % symbol.
+
+\section{Introduction}
+Using this dataset, the main objective was to understand the dynamics of spreading fake news by analyzing the available data in detail. To address this challenge and obtain meaningful insights, Elasticsearch, a powerful distributed search engine, was adopted for its ability to manage and analyze large volumes of data efficiently.
+
+The use of Elasticsearch was motivated by several key factors. First, its flexibility allowed me to efficiently model and index my dataset, enabling me to perform complex queries on large datasets. Elasticsearch's JSON-based structure was particularly well suited to represent the information contained in the fake news dataset in a clear and structured manner.
+
+In addition, Elasticsearch's powerful aggregation functionality was leveraged to extract meaningful insights from my analysis. The ability to dynamically group, filter, and aggregate data facilitated the discovery of patterns and trends in fake news, providing a detailed picture of their distinguishing characteristics.
+
+\section{Dataset}
+This dataset provides detailed information on fake news, collecting each news item as a single document easily identifiable by its name. You can quickly locate each news item using the dataset's search function. \\
+The data schema is: 
+\begin{table}[h!]
+	\begin{center}
+		\begin{tabular}{|m{6em}|m{4em}|m{20em}|}
+		\hline
+		\textbf{Attribute} & \textbf{Type} & \textbf{Description}\\
+		\hline
+			title & Text & The title of the news.\\
+		\hline
+			text & Text & The text of the news.\\
+            \hline
+			subject & Keyword & The category of the news.\\
+		\hline
+                date & Keyword & The date of the news.\\
+            \hline
+                is\_fake & Boolean & A boolean value that states if a news is fake or not.\\
+            \hline
+		\end{tabular}
+	\end{center}
+\end{table}
+\\
+The source of the dataset is:\\
+\url{https://www.kaggle.com/datasets/bhavikjikadara/fake-news-detection}
+\newpage
+\section*{Queries}
+\subsection{List of subjects}
+This query returns an aggregate analysis of the topics present in the documents. Aggregation is done on the "subject" field, providing a list of distinct topics present in the dataset and the number of times each topic appears.\\
+
+\begin{algorithm}[ht]
+\caption{List of subjects}
+\begin{lstlisting} [numbers = left]
+GET /fake-news/_search
+{ 
+  "size": 0,
+  "aggs": {
+    "categories": {
+      "terms": {
+        "field": "subject"
+      }
+    }
+  }
+}
+\end{lstlisting}
+\end{algorithm}
+\newpage
+
+Output:
+\begin{algorithm}[h!]
+\caption{Output List of subjects}
+\begin{lstlisting} [numbers = left]
+{
+  "took": 35,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 10000,
+      "relation": "gte"
+    },
+    "max_score": null,
+    "hits": []
+  },
+  
+  "aggregations": {
+    "categories": {
+      "doc_count_error_upper_bound": 0,
+      "sum_other_doc_count": 59,
+      "buckets": [
+        {
+          "key": "politicsNews",
+          "doc_count": 8979
+        },
+        {
+          "key": "worldnews",
+          "doc_count": 8100
+        },
+        {
+          "key": "News",
+          "doc_count": 7261
+        },
+        {
+          "key": "politics",
+          "doc_count": 5147
+        },
+
+\end{lstlisting}
+\end{algorithm}
+\newpage
+\begin{algorithm}[h!]
+\caption{Output List of subjects}
+\begin{lstlisting} [numbers = left]
+        {
+          "key": "left-news",
+          "doc_count": 3445
+        },
+        {
+          "key": "Government News",
+          "doc_count": 1204
+        },
+        {
+          "key": "US_News",
+          "doc_count": 645
+        },
+        {
+          "key": "Middle-east",
+          "doc_count": 622
+        },
+        {
+          "key": ",politics",
+          "doc_count": 333
+        },
+        {
+          "key": ",left-news",
+          "doc_count": 120
+        }
+      ]
+    }
+  }
+}
+\end{lstlisting}
+\end{algorithm}
+\newpage
+\subsection{Vaccine fake/true news}
+This query will return the aggregate count of documents in the "fake-news" dataset that contain the word "vaccine" in the "text" field, splitting the count based on whether the news is marked as fake or not.\\
+
+\begin{algorithm}[ht]
+\caption{Vaccine fake/true news}
+\begin{lstlisting} [numbers = left]
+GET /fake-news/_search
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "text": "vaccine"
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "fake_news_count": {
+      "terms": {
+        "field": "is_fake"
+      }
+    }
+  }
+}
+\end{lstlisting}
+\end{algorithm}
+\newpage
+
+Output:
+\begin{algorithm}[h!]
+\caption{Vaccine fake/true news}
+\begin{lstlisting} [numbers = left]
+{
+  "took": 3,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 42,
+      "relation": "eq"
+    },
+    "max_score": null,
+    "hits": []
+  },
+  "aggregations": {
+    "fake_news_count": {
+      "doc_count_error_upper_bound": 0,
+      "sum_other_doc_count": 0,
+      "buckets": [
+        {
+          "key": 0,
+          "doc_count": 29
+        },
+        {
+          "key": 1,
+          "doc_count": 13
+        }
+      ]
+    }
+  }
+}
+
+\end{lstlisting}
+\end{algorithm}
+\newpage
+\newpage
+\subsection{2017 fake/true news}
+This query will return the aggregate count of documents in the "fake-news" dataset that have a date containing the year "2017," splitting the count according to whether the news is marked as fake or not.\\
+
+\begin{algorithm}[ht]
+\caption{2017 fake/true news}
+\begin{lstlisting} [numbers = left]
+GET /fake-news/_search
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "wildcard": {
+            "date": "*2017*"
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "fake_news_count": {
+      "terms": {
+        "field": "is_fake"
+      }
+    }
+  }
+}
+\end{lstlisting}
+\end{algorithm}
+\newpage
+
+Output:
+\begin{algorithm}[h!]
+\caption{2017 fake/true news}
+\begin{lstlisting} [numbers = left]
+{
+  "took": 25,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 10000,
+      "relation": "gte"
+    },
+    "max_score": null,
+    "hits": []
+  },
+  "aggregations": {
+    "fake_news_count": {
+      "doc_count_error_upper_bound": 0,
+      "sum_other_doc_count": 0,
+      "buckets": [
+        {
+          "key": 0,
+          "doc_count": 13359
+        },
+        {
+          "key": 1,
+          "doc_count": 7358
+        }
+      ]
+    }
+  }
+}
+
+\end{lstlisting}
+\end{algorithm}
+\newpage
+\subsection{Trump 2016 fake/true news}
+This query will return the aggregate count of the documents in the "fake-news" dataset that contain the word "Trump" in the "text" field and have a date containing the year "2016," the year of his election as President of the United States of America, splitting the count based on whether the news is marked as fake or not.\\
+
+\begin{algorithm}[ht]
+\caption{Trump 2016 fake/true news}
+\begin{lstlisting} [numbers = left]
+GET /fake-news/_search
+{ 
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        { "match": { "text": "Trump" }},
+        { "wildcard": { "date": "*2016*" }}
+      ]
+    }
+  },
+  "aggs": {
+    "trump_news": {
+      "terms": {
+        "field": "is_fake"
+      }
+    }
+  }
+}
+\end{lstlisting}
+\end{algorithm}
+\newpage
+
+Output:
+\begin{algorithm}[h!]
+\caption{Trump 2016 fake/true news}
+\begin{lstlisting} [numbers = left]
+{
+  "took": 11,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 6647,
+      "relation": "eq"
+    },
+    "max_score": null,
+    "hits": []
+  },
+  "aggregations": {
+    "trump_news": {
+      "doc_count_error_upper_bound": 0,
+      "sum_other_doc_count": 0,
+      "buckets": [
+        {
+          "key": 1,
+          "doc_count": 4554
+        },
+        {
+          "key": 0,
+          "doc_count": 2093
+        }
+      ]
+    }
+  }
+}
+
+\end{lstlisting}
+\end{algorithm}
+\newpage
+\subsection{Subject fake/true news}
+This query will return an aggregate analysis of the topics in the "fake-news" documents, showing the number of news items for each topic and further breaking this count down by whether the news item is marked as fake or not.\\
+
+\begin{algorithm}[ht]
+\caption{Subject fake/true news}
+\begin{lstlisting} [numbers = left]
+GET /fake-news/_search
+{ 
+  "size": 0,
+  "aggs": {
+    "categories": {
+      "terms": {
+        "script": {
+          "source": "doc['subject'].value.contains('Government') || doc['subject'].value.contains('left') || doc['subject'].value.contains('politics') ? 'politics' : 'general' ",
+          "lang": "painless"
+        }
+      },
+      "aggs": {
+        "is_fake": {
+          "terms": {
+            "field": "is_fake"
+          }
+        }
+      }
+    }
+  }
+}
+\end{lstlisting}
+\end{algorithm}
+
+\newpage
+
+Output:
+\begin{algorithm}[h!]
+\caption{Subject fake/true news}
+\begin{lstlisting} [numbers = left]
+{
+  "took": 393,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 10000,
+      "relation": "gte"
+    },
+    "max_score": null,
+    "hits": []
+  },
+  "aggregations": {
+    "categories": {
+      "doc_count_error_upper_bound": 0,
+      "sum_other_doc_count": 0,
+      "buckets": [
+        {
+          "key": "politics",
+          "doc_count": 19287,
+          "is_fake": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": 1,
+                "doc_count": 10308
+              },
+              {
+                "key": 0,
+                "doc_count": 8979
+              }
+            ]
+          }
+        },
+\end{lstlisting}
+\end{algorithm}
+
+\newpage
+
+\begin{algorithm}[h!]
+\caption{Subject fake/true news}
+\begin{lstlisting} [numbers = left]
+        {
+          "key": "general",
+          "doc_count": 16628,
+          "is_fake": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": 1,
+                "doc_count": 8528
+              },
+              {
+                "key": 0,
+                "doc_count": 8100
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
+\end{lstlisting}
+\end{algorithm}
+
+\newpage
+
+\subsection{True news}
+This query will return documents from the "fake-news" dataset in which the "is\_fake" field is set to 0, i.e., documents that could be considered as not fake-news.\\
+
+\begin{algorithm}[ht]
+\caption{True news}
+\begin{lstlisting} [numbers = left]
+GET /fake-news/_search
+{  
+  "size": 3,
+  "query": {
+    "term": {
+      "is_fake": 0
+    }
+  }
+}
+\end{lstlisting}
+\end{algorithm}
+\newpage
+
+Output:
+\begin{algorithm}[h!]
+\caption{True news}
+\begin{lstlisting} [numbers = left]
+{
+  "took": 31,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 10000,
+      "relation": "gte"
+    },
+    "max_score": 1,
+    "hits": [
+      {
+        "_index": "fake-news",
+        "_id": "SYHnvIwBSKJFig-fn3dZ",
+        "_score": 1,
+        "_source": {
+          "date": "December 10, 2017 ",
+          "text": "BERLIN (Reuters) - Germany s intelligence service...",
+          "title": "German intelligence unmasks alleged covert Chinese social media profiles",
+          "is_fake": 0,
+          "subject": "worldnews"
+        }
+      },
+\end{lstlisting}
+\end{algorithm}
+\newpage
+\begin{algorithm}[h!]
+\caption{True news}
+\begin{lstlisting} [numbers = left]
+      {
+        "_index": "fake-news",
+        "_id": "SoHnvIwBSKJFig-fn3dZ",
+        "_score": 1,
+        "_source": {
+          "date": "September 2, 2017 ",
+          "text": "HOUSTON (Reuters) - Union Pacific Corp...",
+          "title": "Union Pacific says Arkema chemical plant fire hindering line repairs",
+          "is_fake": 0,
+          "subject": "politicsNews"
+        }
+      },
+      {
+        "_index": "fake-news",
+        "_id": "S4HnvIwBSKJFig-fn3dZ",
+        "_score": 1,
+        "_source": {
+          "date": "June 30, 2016 ",
+          "text": "OTTAWA (Reuters) - U.S. President Barack Obama...",
+          "title": "Obama: Trump's rhetoric is xenophobic, not populist",
+          "is_fake": 0,
+          "subject": "politicsNews"
+        }
+      }
+    ]
+  }
+}
+
+\end{lstlisting}
+\end{algorithm}
+\newpage
+\subsection{2016/2017/2018 fake/true news}
+This query will return an aggregate analysis of "fake-news" documents, showing the number of news items per year (extracted from the date) and further breaking this count down by whether the news item is marked as fake or not. The size is limited to 3, so data will only be returned for the first three years.\\
+
+\begin{algorithm}[ht]
+\caption{2016/2017/2018 fake/true news}
+\begin{lstlisting} [numbers = left]
+GET /fake-news/_search
+{
+  "size": 0,
+  "aggs": {
+    "categories": {
+      "terms": {
+        "script": {
+          "source": "doc['date'].value.trim().substring(doc['date']
+             .value.trim().length() - 4)",
+          "lang": "painless"
+        },
+        "size": 3
+      },
+      "aggs": {
+        "is_fake": {
+          "terms": {
+            "field": "is_fake"
+          }
+        }
+      }
+    }
+  }
+}
+\end{lstlisting}
+\end{algorithm}
+\newpage
+
+Output:
+\begin{algorithm}[h!]
+\caption{2016/2017/2018 fake/true news}
+\begin{lstlisting} [numbers = left]
+{
+  "took": 71,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 10000,
+      "relation": "gte"
+    },
+    "max_score": null,
+    "hits": []
+  },
+  "aggregations": {
+    "categories": {
+      "doc_count_error_upper_bound": 0,
+      "sum_other_doc_count": 31,
+      "buckets": [
+        {
+          "key": "2017",
+          "doc_count": 20717,
+          "is_fake": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": 0,
+                "doc_count": 13359
+              },
+              {
+                "key": 1,
+                "doc_count": 7358
+              }
+            ]
+          }
+        },
+
+\end{lstlisting}
+\end{algorithm}
+\newpage
+\begin{algorithm}[h!]
+\caption{2016/2017/2018 fake/true news}
+\begin{lstlisting} [numbers = left]
+        {
+          "key": "2016",
+          "doc_count": 13162,
+          "is_fake": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": 1,
+                "doc_count": 9442
+              },
+              {
+                "key": 0,
+                "doc_count": 3720
+              }
+            ]
+          }
+        },
+        {
+          "key": "2015",
+          "doc_count": 2005,
+          "is_fake": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": 1,
+                "doc_count": 2005
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
+
+\end{lstlisting}
+\end{algorithm}
+\newpage
+\subsection{Pope news}
+This query will return documents from the "fake-news" dataset in which the "text" field contains the word "Pope".\\
+
+\begin{algorithm}[ht]
+\caption{Pope news}
+\begin{lstlisting} [numbers = left]
+GET /fake-news/_search
+{ 
+  "size": 3,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "text": "Pope"
+          }
+        }
+      ]
+    }
+  }
+}
+\end{lstlisting}
+\end{algorithm}
+\newpage
+
+Output:
+\begin{algorithm}[h!]
+\caption{Pope news}
+\begin{lstlisting} [numbers = left]
+{
+  "took": 10,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 259,
+      "relation": "eq"
+    },
+    "max_score": 9.928849,
+    "hits": [
+      {
+        "_index": "fake-news",
+        "_id": "QoHnvIwBSKJFig-fpoJb",
+        "_score": 9.928849,
+        "_source": {
+          "date": "Jul 9, 2017",
+          "text": "The last time a pope got involved in politics was when...",
+          "title": "POPE FRANCIS Worries USA Has Distorted Vision Of The World",
+          "is_fake": 1,
+          "subject": "left-news"
+        }
+      },
+
+\end{lstlisting}
+\end{algorithm}
+\newpage
+\begin{algorithm}[h!]
+\caption{Pope news}
+\begin{lstlisting} [numbers = left]
+      {
+        "_index": "fake-news",
+        "_id": "VYHnvIwBSKJFig-f3uKJ",
+        "_score": 9.875764,
+        "_source": {
+          "date": "February 19, 2016",
+          "text": "Donald Trump has added Pope Francis to his...",
+          "title": " Colbert Lays A Catholic Smack Down On Trump Over Pope Francis Fight (VIDEO)",
+          "is_fake": 1,
+          "subject": "News"
+        }
+      },
+      {
+        "_index": "fake-news",
+        "_id": "WYHnvIwBSKJFig-fpYGO",
+        "_score": 9.875764,
+        "_source": {
+          "date": "February 23, 2016",
+          "text": "Pope Francis is now the anti-Christ in the eyes of Donald Trump supporters...",
+          "title": " New Hampshire Republican Calls Pope Francis The Anti-Christ (IMAGE)",
+          "is_fake": 1,
+          "subject": "News"
+        }
+      }
+    }
+}
+
+\end{lstlisting}
+\end{algorithm}
+\newpage
+
+\subsection{Artificial intelligence news}
+This query will return documents from the "fake-news" dataset in which it is contained the word "Artificial intelligence" and then it is performed a count based on the subject.\\
+
+\begin{algorithm}[h!]
+\caption{Artificial intelligence}
+\begin{lstlisting} [numbers = left]
+GET /fake-news/_search
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "text": {
+              "query": "Artificial Intelligence",
+              "operator": "and"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "count": {
+      "terms": {
+        "field": "is_fake"
+      }
+    }
+  }
+}
+\end{lstlisting}
+\end{algorithm}
+
+\newpage
+
+Output:
+\begin{algorithm}[h!]
+\caption{Artificial intelligence news}
+\begin{lstlisting} [numbers = left]
+{
+  "took": 2,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 45,
+      "relation": "eq"
+    },
+    "max_score": null,
+    "hits": []
+  },
+  "aggregations": {
+    "count": {
+      "doc_count_error_upper_bound": 0,
+      "sum_other_doc_count": 0,
+      "buckets": [
+        {
+          "key": 1,
+          "doc_count": 27
+        },
+        {
+          "key": 0,
+          "doc_count": 18
+        }
+      ]
+    }
+  }
+}
+
+\end{lstlisting}
+\end{algorithm}
+\newpage
+
+
+\subsection{Soccer news}
+This query will return the first three documents from the "fake-news" dataset more similar to the title of the document given in input. This document is: \\
+
+\begin{algorithm}[h!]
+\caption{Document given in input}
+\begin{lstlisting} [numbers = left]
+{
+    "_index": "fake-news",
+    "_id": "pIHnvIwBSKJFig-fzsUk",
+    "_score": 16.426937,
+    "_source": {
+      "date": "July 7, 2017 ",
+      "text": "MADRID (Reuters) - A Spanish court said on Friday it has exchanged a 21-month prison sentence handed to Soccer player Lionel Messi for tax fraud last July for a quarter-of-a-million-euro fine.  The Barcelona player and his father were found guilty by a Catalan court last year of three counts of tax fraud to the tune of 4.1 million euros ($4.68 million) over income earned from image rights.  The father also had his 15-month sentence exchanged for a fine of 180,000 euros, the court said.  Neither Messi or his father would have served time in jail following the original ruling as defendants without a previous conviction are permitted to serve any sentence of under two years on probation.  ",
+      "title": "Soccer player Messi prison sentence lifted in exchange for fine",
+      "is_fake": 0,
+      "subject": "politicsNews"
+    }
+}
+\end{lstlisting}
+\end{algorithm}
+
+\newpage
+
+\begin{algorithm}[h!]
+\caption{Soccer}
+\begin{lstlisting} [numbers = left]
+GET /fake-news/_search
+{
+  "size": 3,
+  "query": {
+    "more_like_this": {
+      "fields": ["title"],
+      "like": [
+        {
+          "_id": "pIHnvIwBSKJFig-fzsUk"
+        }
+      ],
+      "min_term_freq": 1,
+      "min_doc_freq": 1
+    }
+  }
+}
+\end{lstlisting}
+\end{algorithm}
+
+\newpage
+
+Output:
+\begin{algorithm}[h!]
+\caption{Soccer}
+\begin{lstlisting} [numbers = left]
+{
+  "took": 6,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 18,
+      "relation": "eq"
+    },
+    "max_score": 12.054535,
+    "hits": [
+      {
+        "_index": "fake-news",
+        "_id": "8oHnvIwBSKJFig-fs5VD",
+        "_score": 12.054535,
+        "_source": {
+          "date": "October 19, 2017 ",
+          "text": "TBILISI (Reuters) - Kakha Kaladze climbed to the top of world soccer as a defender for Italian club AC Milan... ",
+          "title": "Former soccer star Kaladze runs for mayor in Georgia's capital",
+          "is_fake": 0,
+          "subject": "worldnews"
+        }
+      },
+      
+\end{lstlisting}
+\end{algorithm}
+
+\newpage
+
+\begin{algorithm}[h!]
+\caption{Soccer}
+\begin{lstlisting} [numbers = left]
+      {
+        "_index": "fake-news",
+        "_id": "TIHnvIwBSKJFig-f4uvZ",
+        "_score": 11.643481,
+        "_source": {
+          "date": "October 15, 2017 ",
+          "text": "MONROVIA (Reuters) - Former soccer star George Weah was set to win the first round of a...",
+          "title": "Ex-soccer star Weah headed for presidential run-off in Liberia",
+          "is_fake": 0,
+          "subject": "worldnews"
+        }
+      },
+      {
+        "_index": "fake-news",
+        "_id": "RoHnvIwBSKJFig-fr49V",
+        "_score": 10.900108,
+        "_source": {
+          "date": "December 8, 2017 ",
+          "text": "TOKYO (Reuters) - Born and raised in Japan, three North Korean soccer players... ",
+          "title": "Soccer: Born in Japan, playing for North Korea under shadow of missile crisis",
+          "is_fake": 0,
+          "subject": "worldnews"
+        }
+      }
+    ]
+  }
+}
+\end{lstlisting}
+\end{algorithm}
