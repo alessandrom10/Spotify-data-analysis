@@ -1,4 +1,4 @@
-## SMBUD Course Project
+## Spotify-data-analysis
 
 This repository contains an analysis of Spotify song attributes, such as loudness, tempo, energy, and danceability, to uncover patterns and insights into musical trends.
 
