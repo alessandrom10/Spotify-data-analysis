@@ -1,6 +1,6 @@
 ## SMBUD Course Project
 
-This repository contains the project for the "Systems and Methods for Big and Unstructured Data" (SMBUD) course.
+This repository contains an analysis of Spotify song attributes, such as loudness, tempo, energy, and danceability, to uncover patterns and insights into musical trends.
 
 ### Project Overview
 
